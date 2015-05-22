@@ -1,0 +1,6 @@
+---
+- hosts: database
+  vars:
+      db_file_name: "[{{ ansible_date_time.epoch }}][{{ ansible_ssh_host }}][{{ db_name }}][{{ ansible_date_time.date }}].dump"
+  roles:
+       - backup_db

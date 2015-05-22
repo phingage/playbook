@@ -1,0 +1,10 @@
+---
+- name: Postgrs Db backup to /tmp/{{ db_file_name }}
+  shell: pg_dump -U {{ db_user }} -h localhost -Fc {{ db_name }} > /tmp/{{ db_file_name }}
+  when: "'postgres' in group_names"
+  
+- name: Copy result to local fs
+  local_action: shell scp {{ hostvars[inventory_hostname]['ansible_ssh_user'] }}@{{ ansible_ssh_host }}:/tmp/{{ db_file_name }} ~/db_backups
+  
+- name: Delete remote dump
+  file: path="/tmp/{{ db_file_name }}" state=absent
