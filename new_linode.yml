@@ -1,0 +1,5 @@
+---
+- hosts: new_linode
+  remote_user: root
+  roles:
+       - first_steps

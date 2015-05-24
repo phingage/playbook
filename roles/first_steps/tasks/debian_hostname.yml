@@ -1,0 +1,19 @@
+---
+ 
+- name: Set Hostname (Ubuntu)
+  hostname: name="{{ server_hostname }}"
+  
+- name: Apply Hostname Changes
+  command: hostname -F /etc/hostname
+   
+- name: Modify /etc/hosts (localhost)
+  lineinfile: dest=/etc/hosts regexp="^127\.0\.0\.1" line="127.0.0.1 localhost.localdomain localhost" state=present owner=root group=root mode=0644
+  
+- name: Modify /etc/hosts (public ip)
+  lineinfile: state=present dest=/etc/hosts regexp="^{{ ansible_eth0.ipv4.address }}" line="{{ ansible_eth0.ipv4.address }} {{ server_hostname }}.{{ fqdn_domain }} {{ server_hostname }}" owner=root group=root mode=0644
+  
+- name: Add private ip to interfaces (disable dhcp)
+  template: src=interfaces.j2 dest=/etc/network/interfaces owner=root group=root mode=0644
+  
+- name: Reload Interfaces
+  shell: ifdown -a && ifup -a

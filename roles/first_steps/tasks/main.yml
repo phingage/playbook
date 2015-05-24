@@ -1,0 +1,31 @@
+---
+- include: debian_hostname.yml
+  when: ansible_distribution in [ 'Debian', 'Ubuntu' ]
+  
+- name: Add user
+  user: name={{ primary_user }} password={{ primary_user_password }} generate_ssh_key=yes groups="sudo" shell=/bin/bash
+  
+- name: Add authorized_hosts to new user
+  authorized_key: user={{ primary_user }} key="{{ item }}" 
+  with_items: key_list
+  
+  
+- name: Update all apt-get
+  apt: update_cache=yes upgrade=dist
+  
+- name: Disallow root SSH access
+  lineinfile: dest=/etc/ssh/sshd_config regexp="^PermitRootLogin" line="PermitRootLogin no" state=present 
+
+- name: Disallow password authentication
+  lineinfile: dest=/etc/ssh/sshd_config regexp="^PasswordAuthentication" line="PasswordAuthentication no" state=present
+  
+- name: Allow TCP forwarding
+  lineinfile: dest=/etc/ssh/sshd_config regexp="^AllowTcpForwarding" line="AllowTcpForwarding yes" state=present
+  when: allow_gateways is defined and allow_gateways
+ 
+- name: Allow Gateways
+  lineinfile: dest=/etc/ssh/sshd_config regexp="^GatewayPorts" line="GatewayPorts yes" state=present
+  when: allow_gateways is defined and allow_gateways
+
+- name: Restart SSH
+  command: service ssh restart
