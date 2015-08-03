@@ -2,4 +2,4 @@
 - hosts: ubuntu_servers
   remote_user: root
   roles:
-	   - ubuntu_upgrade
+       - ubuntu_upgrade
